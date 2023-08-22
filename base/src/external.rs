@@ -1,4 +1,5 @@
-use std::{ffi::c_void, ops::Deref};
+use alloc::boxed::Box;
+use core::{ffi::c_void, ops::Deref};
 
 use lean_sys::{
     lean_alloc_external, lean_apply_1, lean_external_class, lean_get_external_data,
@@ -26,7 +27,7 @@ unsafe impl<A: ?Sized> ForeachObj for TObj<A> {
 #[repr(transparent)]
 pub struct ExternalClass<T: ?Sized> {
     class: lean_external_class,
-    _phantom: std::marker::PhantomData<T>,
+    _phantom: core::marker::PhantomData<T>,
 }
 
 impl<T: ForeachObj> Default for ExternalClass<T> {
@@ -55,7 +56,7 @@ impl<T: ForeachObj> ExternalClass<T> {
                 m_finalize: Some(finalize::<T>),
                 m_foreach: Some(foreach::<T>),
             },
-            _phantom: std::marker::PhantomData,
+            _phantom: core::marker::PhantomData,
         }
     };
 

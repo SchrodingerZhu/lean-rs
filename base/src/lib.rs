@@ -1,10 +1,13 @@
 #![allow(clippy::missing_safety_doc)]
+#![no_std]
 #![cfg_attr(feature = "nightly", feature(fn_traits, unboxed_closures))]
 pub mod closure;
 pub mod external;
 pub mod typed;
 use lean_sys::*;
 pub use typed::*;
+
+extern crate alloc;
 
 pub type ObjPtr = *mut lean_object;
 #[repr(transparent)]
@@ -40,7 +43,7 @@ impl Obj {
 
     pub fn into_raw(self) -> ObjPtr {
         let p = self.0;
-        std::mem::forget(self);
+        core::mem::forget(self);
         p
     }
 
@@ -48,7 +51,7 @@ impl Obj {
         let o = Obj(lean_alloc_ctor(
             tag.into(),
             args.len() as u32,
-            std::mem::size_of::<T>() as _,
+            core::mem::size_of::<T>() as _,
         ));
         let ptr = lean_ctor_obj_cptr(o.0).cast::<[Obj; N]>();
         ptr.write(args);
@@ -61,7 +64,7 @@ impl Obj {
     }
 
     pub unsafe fn to_string(&self) -> &str {
-        std::str::from_utf8_unchecked(std::slice::from_raw_parts(
+        core::str::from_utf8_unchecked(core::slice::from_raw_parts(
             &*lean_string_cstr(self.0),
             lean_string_size(self.0) - 1,
         ))
